@@ -73,6 +73,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         self.tool_buttons = {}  # Dictionary to store mutually exclusive tool names and their corresponding buttons
         self.page_list = PageListView()
         
+        
         # Webtoon mode state
         self.webtoon_mode = False
 
@@ -123,7 +124,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         # Navigation rail
         nav_rail_layout = self._create_nav_rail()
         self.main_layout.addLayout(nav_rail_layout)
-        self.main_layout.addWidget(MDivider(orientation=QtCore.Qt.Vertical))
+        self.main_layout.addWidget(MDivider(orientation=QtCore.Qt.Orientation.Vertical))
 
         # Create main content and a stacked container so switching pages
         # doesn't add/remove widgets (which can change window size)
@@ -217,7 +218,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         self.save_all_browser.set_file_types(save_all_file_types)
         self.save_all_browser.setToolTip(self.tr("Export all Images"))
 
-        nav_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Vertical, exclusive=True)
+        nav_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Orientation.Vertical, exclusive=True)
         nav_tools = [
             {"svg": "home_line.svg", "checkable": True, "tooltip": self.tr("Home"), "clicked": self.show_main_page},
             {"svg": "settings.svg", "checkable": True, "tooltip": self.tr("Settings"), "clicked": self.show_settings_page},
@@ -292,7 +293,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
 
         header_layout = QtWidgets.QHBoxLayout()
 
-        self.undo_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Horizontal, exclusive=True)
+        self.undo_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Orientation.Horizontal, exclusive=True)
         undo_tools = [
             {"svg": "undo.svg", "checkable": False, "tooltip": self.tr("Undo")},
             {"svg": "redo.svg", "checkable": False, "tooltip": self.tr("Redo")},
@@ -358,10 +359,12 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         left_layout = QtWidgets.QVBoxLayout()
         left_layout.addWidget(MDivider())
 
-        self.image_card_layout = QtWidgets.QVBoxLayout()
-        self.image_card_layout.addStretch(1)  # Add stretch to keep cards at the top
-
-        self.page_list.setLayout(self.image_card_layout)
+        # --- INÍCIO DA CORREÇÃO ---
+        # A linha "self.page_list.setLayout(...)" foi removida daqui,
+        # pois estava corrompendo o layout do QListWidget.
+        # A variável 'image_card_layout' não é mais necessária.
+        # --- FIM DA CORREÇÃO ---
+        
         left_layout.addWidget(self.page_list)
         left_widget = QtWidgets.QWidget()
         left_widget.setLayout(left_layout)
@@ -464,7 +467,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         )
         self.block_font_color_button.setProperty('selected_color', dflt_clr)
 
-        self.alignment_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Horizontal, exclusive=True)
+        self.alignment_tool_group = MToolButtonGroup(orientation=QtCore.Qt.Orientation.Horizontal, exclusive=True)
         alignment_tools = [
             {"svg": "tabler--align-left.svg", "checkable": True, "tooltip": "Align Left"},
             {"svg": "tabler--align-center.svg", "checkable": True, "tooltip": "Align Center"},
@@ -575,7 +578,7 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         self.change_all_blocks_size_diff.setValidator(int_validator)
         
         # Optional: Ensure the text is center-aligned
-        self.change_all_blocks_size_diff.setAlignment(QtCore.Qt.AlignCenter)
+        self.change_all_blocks_size_diff.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         
         self.change_all_blocks_size_inc = self.create_tool_button(svg="add_line.svg")
         self.change_all_blocks_size_inc.setToolTip(self.tr("Increase the size of all blocks"))
@@ -647,11 +650,10 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         splitter.addWidget(central_widget)
         splitter.addWidget(right_widget)
 
-        right_widget.setMinimumWidth(240)  # Adjust this value as needed
-
-        splitter.setStretchFactor(0, 40)  # Left widget
-        splitter.setStretchFactor(1, 80)  # Central widget
-        splitter.setStretchFactor(2, 10)  # Right widget
+        # Mantém as correções de layout para estabilidade
+        left_widget.setMinimumWidth(180)
+        right_widget.setMinimumWidth(350)
+        splitter.setSizes([200, 700, 400])
 
         content_layout = QtWidgets.QVBoxLayout()
         content_layout.addLayout(header_layout)
@@ -816,11 +818,9 @@ class ComicTranslateUI(QtWidgets.QMainWindow):
         default_color = QtGui.QColor('#000000')
         color_dialog = QtWidgets.QColorDialog()
         color_dialog.setCurrentColor(default_color)
-        if color_dialog.exec() == QtWidgets.QDialog.Accepted:
+        if color_dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             color = color_dialog.selectedColor()
             return color
         
     def set_font(self, font_family: str):
         self.font_dropdown.setCurrentFont(font_family)
-        
-
